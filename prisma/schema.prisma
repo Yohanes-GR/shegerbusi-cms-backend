@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id          String   @id @default("main")
+  name        String
+  shortName   String
+  tagline     String
+  description String
+  phone       String
+  mobile      String
+  email       String
+  address     String
+  mapsUrl     String   @default("")
+  hours       String
+  facebook    String   @default("")
+  instagram   String   @default("")
+  linkedin    String   @default("")
+  twitter     String   @default("")
+  youtube     String   @default("")
+  telegram    String   @default("")
+  whatsapp    String   @default("")
+  logo        String   @default("")
+  updatedAt   DateTime @updatedAt
+}
+
+model Home {
+  id                String        @id @default("main")
+  kicker            String
+  title             String
+  titleLine2        String
+  subtitle          String
+  ctaPrimaryLabel   String
+  ctaPrimaryHref    String
+  ctaSecondaryLabel String
+  ctaSecondaryHref  String
+  divisionsKicker   String
+  divisionsTitle    String
+  processKicker     String
+  processTitle      String
+  processText       String
+  projectsKicker    String
+  projectsTitle     String
+  ctaTitle          String
+  ctaText           String
+  motionMode        String        @default("slideshow")
+  motionVideoUrl    String        @default("")
+  motionIntervalMs  Int           @default(7000)
+  motionEffect      String        @default("kenburns")
+  updatedAt         DateTime      @updatedAt
+  motionImages      MotionImage[]
+}
+
+model MotionImage {
+  id        String @id @default(cuid())
+  src       String
+  alt       String @default("")
+  sortOrder Int
+  homeId    String @default("main")
+  home      Home   @relation(fields: [homeId], references: [id], onDelete: Cascade)
+
+  @@index([homeId, sortOrder])
+}
+
+model About {
+  id         String   @id @default("main")
+  kicker     String
+  title      String
+  text       String
+  image      String   @default("")
+  whyKicker  String
+  whyTitle   String
+  paragraphs String[]
+  updatedAt  DateTime @updatedAt
+}
+
+model PageCopy {
+  key       String   @id
+  kicker    String
+  title     String
+  text      String
+  image     String   @default("")
+  updatedAt DateTime @updatedAt
+}
+
+model Stat {
+  id        String @id @default(cuid())
+  value     String
+  label     String
+  sortOrder Int
+
+  @@index([sortOrder])
+}
+
+model ProcessStep {
+  id        String @id @default(cuid())
+  n         String
+  title     String
+  text      String
+  sortOrder Int
+
+  @@index([sortOrder])
+}
+
+model Service {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  summary     String    @default("")
+  description String    @default("")
+  image       String    @default("")
+  logo        String    @default("")
+  gallery     String[]  @default([])
+  highlights  String[]
+  isDivision  Boolean   @default(false)
+  code        String?
+  shortName   String?
+  accent      String?
+  sortOrder   Int       @default(0)
+  parentId    String?
+  parent      Service?  @relation("ServiceTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Service[] @relation("ServiceTree")
+
+  @@index([parentId, sortOrder])
+}
+
+model Project {
+  id        String @id @default(cuid())
+  slug      String @unique
+  title     String
+  category  String
+  division  String @default("")
+  location  String @default("")
+  year      String @default("")
+  image     String @default("")
+  summary   String @default("")
+  sortOrder Int    @default(0)
+
+  @@index([sortOrder])
+}
+
+model Listing {
+  id        String @id @default(cuid())
+  listingId String @unique
+  title     String
+  type      String
+  status    String
+  area      String @default("")
+  size      String @default("")
+  price     String @default("")
+  image     String @default("")
+  sortOrder Int    @default(0)
+
+  @@index([sortOrder])
+}
+
+model Inquiry {
+  id           String   @id
+  name         String
+  email        String
+  phone        String
+  organisation String?
+  service      String?
+  message      String
+  receivedAt   DateTime @default(now())
+  read         Boolean  @default(false)
+
+  @@index([receivedAt])
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  url       String
+  mimeType  String?
+  size      Int?
+  createdAt DateTime @default(now())
+}
+
+model Partner {
+  id        String @id @default(cuid())
+  name      String
+  logo      String @default("")
+  url       String @default("")
+  sortOrder Int    @default(0)
+
+  @@index([sortOrder])
+}

@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f3ee;
+  --foreground: #0b1220;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: #01268a;
+  --color-brand-dark: #001c66;
+  --color-brand-deep: #001044;
+  --color-accent: #fe7e03;
+  --color-accent-dark: #e56e00;
+  --color-sand: #f6f3ee;
+  --color-mist: #e8eef8;
+  --color-ink: #0b1220;
+  --color-muted: #5c6578;
+  --font-sans: var(--font-outfit);
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+.bg-dot-grid {
+  background-color: #001044;
+  background-image: radial-gradient(rgba(254, 126, 3, 0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+input,
+select,
+textarea {
+  font-size: 1rem;
+}
+
+::selection {
+  background: #fe7e03;
+  color: #fff;
+}
+
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease both;
+}
+
+.delay-1 {
+  animation-delay: 0.1s;
+}
+.delay-2 {
+  animation-delay: 0.2s;
+}
+.delay-3 {
+  animation-delay: 0.3s;
+}
+
+.diagonal-cut {
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+@media (min-width: 1024px) {
+  .photo-cut-right {
+    clip-path: polygon(0 0, 94% 0, 100% 14%, 100% 100%, 0 100%);
+  }
+
+  .photo-cut-left {
+    clip-path: polygon(6% 0, 100% 0, 100% 100%, 0 100%, 0 14%);
+  }
+}
+
+@keyframes kenburns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.14) translate(-2%, -1.5%);
+  }
+}
+
+@keyframes kenburns-alt {
+  0% {
+    transform: scale(1.12) translate(-2%, 0);
+  }
+  100% {
+    transform: scale(1) translate(1.5%, -1%);
+  }
+}
+
+@keyframes hero-zoom-in {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes hero-zoom-out {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-pan {
+  from {
+    transform: scale(1.1) translateX(-4%);
+  }
+  to {
+    transform: scale(1.1) translateX(4%);
+  }
+}
+
+@keyframes hero-pan-alt {
+  from {
+    transform: scale(1.1) translateX(4%);
+  }
+  to {
+    transform: scale(1.1) translateX(-4%);
+  }
+}
+
+.hero-kenburns {
+  animation: kenburns 18s ease-out forwards;
+}
+
+.hero-kenburns-alt {
+  animation: kenburns-alt 18s ease-out forwards;
+}
+
+.hero-zoom-in {
+  animation: hero-zoom-in 18s ease-out forwards;
+}
+
+.hero-zoom-out {
+  animation: hero-zoom-out 18s ease-out forwards;
+}
+
+.hero-pan {
+  animation: hero-pan 22s ease-in-out forwards;
+}
+
+.hero-pan-alt {
+  animation: hero-pan-alt 22s ease-in-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-kenburns,
+  .hero-kenburns-alt,
+  .hero-zoom-in,
+  .hero-zoom-out,
+  .hero-pan,
+  .hero-pan-alt {
+    animation: none;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  width: max-content;
+  animation: marquee 48s linear infinite;
+}
+
+@keyframes logo-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.logo-marquee-track {
+  width: max-content;
+  animation: logo-marquee 80s linear infinite;
+}
+
+.logo-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .logo-marquee-track {
+    animation: none;
+  }
+}
