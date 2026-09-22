@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
 
+const TRUSTED_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "10.0.102.57",
+  "196.189.119.89",
+  "shegerbusinessgroup.com",
+  "www.shegerbusinessgroup.com",
+]);
+
 export function allowedOrigins() {
   const extra = (process.env.CORS_ORIGINS || "")
     .split(",")
@@ -14,10 +23,31 @@ export function allowedOrigins() {
         "http://localhost:3002",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3002",
+        "http://10.0.102.57:3000",
+        "http://10.0.102.57:3002",
+        "https://10.0.102.57:3000",
+        "https://10.0.102.57:3002",
+        "http://196.189.119.89:3000",
+        "http://196.189.119.89:3002",
+        "https://196.189.119.89",
+        "https://196.189.119.89:3000",
+        "https://196.189.119.89:3002",
+        "https://shegerbusinessgroup.com",
+        "https://www.shegerbusinessgroup.com",
         ...extra,
       ].filter(Boolean) as string[],
     ),
   );
+}
+
+function originAllowed(origin: string, allowed: string[]) {
+  if (!origin) return false;
+  if (allowed.includes(origin) || allowed.includes("*")) return true;
+  try {
+    return TRUSTED_HOSTS.has(new URL(origin).hostname);
+  } catch {
+    return false;
+  }
 }
 
 export function corsHeaders(request: Request) {
@@ -27,10 +57,7 @@ export function corsHeaders(request: Request) {
   headers.set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
   headers.set("Access-Control-Allow-Headers", "Authorization, Content-Type");
   headers.set("Access-Control-Max-Age", "86400");
-  if (origin && (allowed.includes(origin) || allowed.includes("*"))) {
-    headers.set("Access-Control-Allow-Origin", origin);
-    headers.set("Vary", "Origin");
-  } else if (origin && allowed.length === 0) {
+  if (originAllowed(origin, allowed)) {
     headers.set("Access-Control-Allow-Origin", origin);
     headers.set("Vary", "Origin");
   }
