@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { adminCookieName, destroySession, tokenFromRequest } from "@/lib/auth";
 import { preflight, withCors } from "@/lib/cors";
 
 export async function OPTIONS(request: Request) {
@@ -6,5 +7,14 @@ export async function OPTIONS(request: Request) {
 }
 
 export async function POST(request: Request) {
-  return withCors(request, NextResponse.json({ ok: true }));
+  await destroySession(tokenFromRequest(request));
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set(adminCookieName(), "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
+  return withCors(request, response);
 }

@@ -1,7 +1,13 @@
+import { randomBytes } from "crypto";
 import { prisma } from "./prisma";
 import { hashPassword } from "./passwords";
 
 const COOKIE = "sbg_admin";
+const SESSION_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function sessionMaxAgeSeconds() {
+  return SESSION_MS / 1000;
+}
 
 export function adminCookieName() {
   return COOKIE;
@@ -11,21 +17,40 @@ export function getAdminSecret() {
   return process.env.ADMIN_SECRET || "sheger-cms-secret-change-me";
 }
 
-export async function sessionToken(userId: string) {
-  const data = new TextEncoder().encode(`${userId}::${getAdminSecret()}`);
-  const buf = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+export function tokenFromRequest(request: Request) {
+  const header = request.headers.get("authorization") || "";
+  if (header.startsWith("Bearer ")) {
+    const bearer = header.slice(7).trim();
+    if (bearer) return bearer;
+  }
+  const cookie = request.headers.get("cookie") || "";
+  const match = cookie.match(/(?:^|;\s*)sbg_admin=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+export async function createSession(userId: string) {
+  const token = randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + SESSION_MS);
+  await prisma.cmsSession.create({
+    data: { token, userId, expiresAt },
+  });
+  return { token, expiresAt };
+}
+
+export async function destroySession(token?: string | null) {
+  if (!token) return;
+  await prisma.cmsSession.deleteMany({ where: { token } });
 }
 
 export async function userIdFromToken(token?: string | null) {
   if (!token) return null;
-  const users = await prisma.cmsUser.findMany({ select: { id: true } });
-  for (const user of users) {
-    if (token === (await sessionToken(user.id))) return user.id;
+  const session = await prisma.cmsSession.findUnique({ where: { token } });
+  if (!session) return null;
+  if (session.expiresAt.getTime() <= Date.now()) {
+    await prisma.cmsSession.delete({ where: { id: session.id } }).catch(() => {});
+    return null;
   }
-  return null;
+  return session.userId;
 }
 
 export async function isValidSession(token?: string | null) {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ensureDefaultUser, sessionToken } from "@/lib/auth";
+import { adminCookieName, createSession, ensureDefaultUser, sessionMaxAgeSeconds } from "@/lib/auth";
 import { verifyPassword } from "@/lib/passwords";
 import { prisma } from "@/lib/prisma";
 import { preflight, withCors } from "@/lib/cors";
@@ -22,9 +22,19 @@ export async function POST(request: Request) {
       NextResponse.json({ message: "Incorrect username or password." }, { status: 401 }),
     );
   }
-  const token = await sessionToken(user.id);
-  return withCors(
-    request,
-    NextResponse.json({ ok: true, token, username: user.username }),
-  );
+  const { token, expiresAt } = await createSession(user.id);
+  const response = NextResponse.json({
+    ok: true,
+    token,
+    username: user.username,
+    expiresAt: expiresAt.toISOString(),
+  });
+  response.cookies.set(adminCookieName(), token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: sessionMaxAgeSeconds(),
+  });
+  return withCors(request, response);
 }
