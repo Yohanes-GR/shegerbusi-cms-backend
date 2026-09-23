@@ -23,9 +23,17 @@ export async function PUT(request: Request) {
   if (!site?.company?.name || !Array.isArray(site.divisions)) {
     return withCors(request, NextResponse.json({ message: "Invalid site payload." }, { status: 400 }));
   }
-  if (!Array.isArray(site.partners)) {
+  if (!Array.isArray(site.partners) || !Array.isArray(site.news) || !Array.isArray(site.careers)) {
     const current = await getSite();
-    site.partners = current.partners ?? [];
+    if (!Array.isArray(site.partners)) site.partners = current.partners ?? [];
+    if (!Array.isArray(site.news)) site.news = current.news ?? [];
+    if (!Array.isArray(site.careers)) site.careers = current.careers ?? [];
+    site.pages = {
+      ...current.pages,
+      ...site.pages,
+      news: site.pages?.news ?? current.pages.news,
+      careers: site.pages?.careers ?? current.pages.careers,
+    };
   }
   await saveSite(site);
   return withCors(request, NextResponse.json({ ok: true }));

@@ -192,3 +192,38 @@ model Partner {
 
   @@index([sortOrder])
 }
+
+model Article {
+  id        String @id @default(cuid())
+  slug      String @unique
+  title     String
+  date      String @default("")
+  excerpt   String @default("")
+  body      String @default("")
+  image     String @default("")
+  sortOrder Int    @default(0)
+
+  @@index([sortOrder])
+}
+
+model Career {
+  id        String @id @default(cuid())
+  slug      String @unique
+  title     String
+  location  String @default("")
+  type      String @default("")
+  excerpt   String @default("")
+  body      String @default("")
+  image     String @default("")
+  sortOrder Int    @default(0)
+
+  @@index([sortOrder])
+}
+
+model CmsUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

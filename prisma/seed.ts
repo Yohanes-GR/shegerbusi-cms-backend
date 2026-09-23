@@ -1,8 +1,10 @@
+import { ensureDefaultUser } from "../lib/auth";
 import { defaultSite, saveSite } from "../lib/cms";
 import { prisma } from "../lib/prisma";
 
 async function main() {
   await saveSite(defaultSite());
+  await ensureDefaultUser();
   console.log("Seeded Sheger Business Group into PostgreSQL.");
 }
 

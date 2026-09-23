@@ -30,6 +30,8 @@ export function defaultSite(): SiteContent {
     partners: [],
     divisions,
     projects,
+    news: [],
+    careers: [],
     listings,
     processSteps,
     home: {
@@ -106,6 +108,20 @@ export function defaultSite(): SiteContent {
         text: "Browse current listings or talk to us about a development site.",
         image:
           "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=2400&q=80",
+      },
+      news: {
+        kicker: "News & Insights",
+        title: "Stories from the group.",
+        text: "Project updates and perspectives from Sheger Business Group.",
+        image:
+          "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2400&q=80",
+      },
+      careers: {
+        kicker: "Careers",
+        title: "Build with Sheger.",
+        text: "Open roles across architecture, construction, real estate, interiors, and trade.",
+        image:
+          "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2400&q=80",
       },
     },
   };
@@ -190,6 +206,8 @@ async function loadSite(): Promise<SiteContent | null> {
     stepRows,
     serviceRows,
     projectRows,
+    articleRows,
+    careerRows,
     listingRows,
     partnerRows,
   ] = await Promise.all([
@@ -204,6 +222,8 @@ async function loadSite(): Promise<SiteContent | null> {
     prisma.processStep.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.service.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.project.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.article.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.career.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.listing.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.partner.findMany({ orderBy: { sortOrder: "asc" } }),
   ]);
@@ -278,6 +298,23 @@ async function loadSite(): Promise<SiteContent | null> {
       image: row.image,
       summary: row.summary,
     })),
+    news: articleRows.map((row) => ({
+      slug: row.slug,
+      title: row.title,
+      date: row.date,
+      excerpt: row.excerpt,
+      body: row.body,
+      image: row.image,
+    })),
+    careers: careerRows.map((row) => ({
+      slug: row.slug,
+      title: row.title,
+      location: row.location,
+      type: row.type,
+      excerpt: row.excerpt,
+      body: row.body,
+      image: row.image,
+    })),
     listings: listingRows.map((row) => ({
       id: row.listingId,
       title: row.title,
@@ -328,6 +365,8 @@ async function loadSite(): Promise<SiteContent | null> {
       projects: pages.projects ?? fallback.pages.projects,
       contact: pages.contact ?? fallback.pages.contact,
       realEstate: pages.realEstate ?? fallback.pages.realEstate,
+      news: pages.news ?? fallback.pages.news,
+      careers: pages.careers ?? fallback.pages.careers,
     },
   };
 }
@@ -339,6 +378,18 @@ export async function getSite(): Promise<SiteContent> {
   const site = defaultSite();
   await saveSite(site);
   return site;
+}
+
+function withUniqueSlugs<T extends { slug: string }>(items: T[]) {
+  const used = new Set<string>();
+  return items.map((item) => {
+    const base = item.slug?.trim() || "item";
+    let slug = base;
+    let n = 2;
+    while (used.has(slug)) slug = `${base}-${n++}`;
+    used.add(slug);
+    return { ...item, slug };
+  });
 }
 
 export async function saveSite(site: SiteContent) {
@@ -416,6 +467,41 @@ export async function saveSite(site: SiteContent) {
       await tx.processStep.createMany({
         data: site.processSteps.map((step, sortOrder) => ({ ...step, sortOrder })),
       });
+
+      if (Array.isArray(site.news)) {
+        await tx.article.deleteMany();
+        if (site.news.length) {
+          await tx.article.createMany({
+            data: withUniqueSlugs(site.news).map((item, sortOrder) => ({
+              slug: item.slug,
+              title: item.title,
+              date: item.date ?? "",
+              excerpt: item.excerpt ?? "",
+              body: item.body ?? "",
+              image: item.image ?? "",
+              sortOrder,
+            })),
+          });
+        }
+      }
+
+      if (Array.isArray(site.careers)) {
+        await tx.career.deleteMany();
+        if (site.careers.length) {
+          await tx.career.createMany({
+            data: withUniqueSlugs(site.careers).map((item, sortOrder) => ({
+              slug: item.slug,
+              title: item.title,
+              location: item.location ?? "",
+              type: item.type ?? "",
+              excerpt: item.excerpt ?? "",
+              body: item.body ?? "",
+              image: item.image ?? "",
+              sortOrder,
+            })),
+          });
+        }
+      }
 
       await tx.project.deleteMany();
       if (site.projects.length) {

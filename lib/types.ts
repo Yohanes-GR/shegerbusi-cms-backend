@@ -60,6 +60,25 @@ export type Partner = {
 };
 export type ProcessStep = { n: string; title: string; text: string };
 
+export type NewsItem = {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  body: string;
+  image: string;
+};
+
+export type Career = {
+  slug: string;
+  title: string;
+  location: string;
+  type: string;
+  excerpt: string;
+  body: string;
+  image: string;
+};
+
 export type Project = {
   slug: string;
   title: string;
@@ -114,6 +133,8 @@ export type SiteContent = {
   partners: Partner[];
   divisions: Division[];
   projects: Project[];
+  news: NewsItem[];
+  careers: Career[];
   listings: Listing[];
   processSteps: ProcessStep[];
   home: HomeContent;
@@ -123,5 +144,7 @@ export type SiteContent = {
     projects: PageCopy;
     contact: PageCopy;
     realEstate: PageCopy;
+    news: PageCopy;
+    careers: PageCopy;
   };
 };

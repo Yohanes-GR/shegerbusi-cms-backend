@@ -7,6 +7,8 @@ const TRUSTED_HOSTS = new Set([
   "196.189.119.89",
   "shegerbusinessgroup.com",
   "www.shegerbusinessgroup.com",
+  "cms.shegerbusinessgroup.com",
+  "46.224.36.213",
 ]);
 
 export function allowedOrigins() {
